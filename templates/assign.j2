@@ -1,0 +1,16 @@
+{% extends "base.j2" %}
+
+{% block title %}Assign{% endblock %}
+{% block _title %}Assign{% endblock %}
+
+{% block content %}
+
+<form action="" method="POST">
+  <div class="form-group">
+    <label for="InputAssignee">Assignee</label>
+    <input class="form-control" id="InputAssignee" placeholder="Enter assignee" name="assignee">
+  </div>
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+{% endblock %}

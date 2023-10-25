@@ -1,0 +1,37 @@
+{% extends "base.j2" %}
+
+{% block title %}Process-instances{% endblock %}
+{% block _title %}Process-instances{% endblock %}
+
+{% block content %}
+<table class="table">
+
+<tr>
+<th>Key</th>
+<th>Process version</th>
+<th>BPMN process id</th>
+<th>Start date</th>
+<th>State</th>
+<th>Process definition key</th>
+<th>Tenant id</th>
+<th></th>
+<th></th>
+</tr>
+
+{% for item in items %}
+<tr>
+
+	<td>{{item.key|e}}</td>
+	<td>{{item.processVersion|e}}</td>
+	<td>{{item.bpmnProcessId|e}}</td>
+	<td>{{item.startDate}}</td>
+	<td>{{item.state|e}}</td>
+	<td>{{item.processDefinitionKey|e}}</td>
+	<td>{{item.tenantId|e}}</td>
+
+	<td><form method="POST" action="/process-instance/{{item.key}}/delete"><button class="btn btn-danger">Delete</button></form></td>
+</tr>
+{% endfor %}
+
+</table>
+{% endblock %}

@@ -1,3 +1,9 @@
+# this file contain all "secrets" such as client-secrets on camunda
+cma_secrets.py
+
+# token contains tokens to talk to camunda
+*.token
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
