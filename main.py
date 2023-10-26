@@ -72,4 +72,11 @@ def task_assign(task_id):
         return render_template('assign.j2')
 
 
+@app.route('/variable')
+def variable():
+    data = call('POST', '/v1/variables/search')
+    items = data.json()['items']
+    return render_template('variables.j2', items=items)
+
+
 app.run(debug=True)

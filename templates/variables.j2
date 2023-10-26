@@ -1,0 +1,32 @@
+{% extends "base.j2" %}
+
+{% block title %}Variables{% endblock %}
+{% block _title %}Variables{% endblock %}
+
+{% block content %}
+<table class="table">
+
+  <tr>
+    <th>Key</th>
+    <th>Process instance key</th>
+    <th>Scope key</th>
+    <th>Name</th>
+    <th>Value</th>
+    <th>Truncated</th>
+    <th>Tenant id</th>
+  </tr>
+
+  {% for item in items %}
+  <tr>
+    <td>{{item.key|e}}</td>
+    <td>{{item.processInstanceKey|e}}</td>
+    <td>{{item.scopeKey|e}}</td>
+    <td>{{item.name|e}}</td>
+    <td>{{item.value|e}}</td>
+    <td>{{item.truncated|e}}</td>
+    <td>{{item.tenantId|e}}</td>
+  </tr>
+  {% endfor %}
+
+</table>
+{% endblock %}

@@ -43,6 +43,7 @@ def call(method, endpoint, data=None):
         '/v1/tasks': 'tasklist',
         '/v1/process-definitions': 'operate',
         '/v1/process-instances': 'operate',
+        '/v1/variables': 'operate',
     }["/".join(endpoint.split('/')[:3])]
 
     token = get_token(audience)
