@@ -36,7 +36,7 @@
 
 <td>{{item.taskState}}</td>
 <td>{{item.processDefinitionKey}}</td>
-<td>{{item.processInstanceKey}}</td>
+<td><a href="/process-instance/{{item.processInstanceKey|e}}">{{item.processInstanceKey}}</a></td>
 <!-- <td><a href="/form/{{item.formKey}}/{{item.processDefinitionKey}}">Goto form</a></td>
 TODO: implement link to form
 -->

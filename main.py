@@ -26,6 +26,22 @@ def process():
     return render_template('process-instances.j2', items=items, alert=alert)
 
 
+@app.route('/process-instance/<process_key>')
+def process_instance(process_key):
+    data = call('GET', '/v1/process-instances/{0}'.format(process_key))
+    item = data.json()
+
+    tasks = call('POST', '/v1/tasks/search',
+                 data={'processInstanceKey': process_key})
+    tasks = tasks.json()
+
+    variables = call('POST', '/v1/variables/search',
+                     data={'processInstanceKey': process_key})
+    variables = variables.json()['items']
+
+    return render_template('process-instance.j2', process_instance=item, tasks=tasks, variables=variables)
+
+
 @app.route('/process-instance/<process_key>/delete', methods=['POST'])
 def process_delete(process_key):
     data = call('DELETE', '/v1/process-instances/{0}'.format(process_key))
@@ -54,7 +70,7 @@ def task():
 @app.route('/task/<task_id>/complete', methods=['POST'])
 def task_complete(task_id):
     call('PATCH', '/v1/tasks/{0}/complete'.format(task_id))
-    return redirect('/task')
+    return redirect(request.form.get('redirect_to', '/task'))
 
 
 @app.route('/task/<task_id>/assign', methods=['GET', 'POST'])

@@ -19,7 +19,7 @@
   {% for item in items %}
   <tr>
     <td>{{item.key|e}}</td>
-    <td>{{item.processInstanceKey|e}}</td>
+    <td><a href="/process-instance/{{item.processInstanceKey|e}}">{{item.processInstanceKey|e}}</a></td>
     <td>{{item.scopeKey|e}}</td>
     <td>{{item.name|e}}</td>
     <td>{{item.value|e}}</td>
