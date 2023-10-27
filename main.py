@@ -137,4 +137,5 @@ def form(form_id, process_definition_key):
         return render_template('form.j2', components=components, task=request.args.get('task-id'))
 
 
-app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug=True)
