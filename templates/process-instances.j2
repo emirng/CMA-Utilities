@@ -21,7 +21,7 @@
 {% for item in items %}
 <tr>
 
-	<td>{{item.key|e}}</td>
+	<td><a href="/process-instance/{{item.key|e}}">{{item.key|e}}</a></td>
 	<td>{{item.processVersion|e}}</td>
 	<td>{{item.bpmnProcessId|e}}</td>
 	<td>{{item.startDate}}</td>

@@ -1,0 +1,134 @@
+{% extends "base.j2" %}
+
+{% block title %}Process instance{% endblock %}
+{% block _title %}Process instance{% endblock %}
+
+{% block content %}
+
+<h3 class="box-title mt-5">{{process_instance.key}}</h3>
+
+<div class="table-responsive">
+  <table class="table table-striped table-product">
+
+    <tr>
+      <td>Key</td>
+      <td>{{process_instance.key}}</td>
+    </tr>
+
+    <tr>
+      <td>Process version</td>
+      <td>{{process_instance.processVersion}}</td>
+    </tr>
+
+    <tr>
+      <td>BPMN Process id</td>
+      <td>{{process_instance.bpmnPorcessId}}</td>
+    </tr>
+
+    <tr>
+      <td>Start date</td>
+      <td>{{process_instance.startDate}}</td>
+    </tr>
+
+    <tr>
+      <td>State</td>
+      <td>{{process_instance.state}}</td>
+    </tr>
+
+    <tr>
+      <td>Process definition key</td>
+      <td>{{process_instance.processDefinitionKey}}</td>
+    </tr>
+
+    <tr>
+      <td>Tenant id</td>
+      <td>{{process_instance.tenantId}}</td>
+    </tr>
+
+  </table>
+</div>
+
+<h3 class="box-title mt-5">Tasks</h3>
+
+<table class="table">
+
+  <tr>
+    <th>Id</th>
+    <th>Name</th>
+    <th>Creation data</th>
+    <th>Completion data</th>
+    <th>Assignee</th>
+    <th>Task state</th>
+    <th>Process definition key</th>
+    <th>Process instance key</th>
+    <th>Form</th>
+    <th></th>
+  </tr>
+
+  {% for item in tasks %}
+  <tr{% if item.taskState == "COMPLETED" %} class="success"{% endif %}>
+    <td>{{item.id}}</td>
+    <td>{{item.name}}</td>
+    <td>{{item.creationDate}}</td>
+    <td>{{item.completionDate}}</td>
+    <td>
+    {% if item.assignee %}
+    {{item.assignee}}
+    <!-- <br><a href="#">Unassign</a> TODO: implement unassign function -->
+    {% else %}
+    <i>Unassigned</i><br><a href="/task/{{item.id}}/assign">Assign</a>
+    {% endif %}
+    </td>
+    <td>{{item.taskState}}</td>
+    <td>{{item.processDefinitionKey}}</td>
+    <td>{{item.processInstanceKey}}</td>
+
+    <td>
+        {% if item.formKey %}
+        <a href="/form/{{item.formId}}/{{item.processDefinitionKey}}?process-instance={{item.processInstanceKey}}&task-id={{item.id}}">Goto form</a>
+        {% endif %}
+    </td>
+
+
+    <td>
+      {% if item.taskState != "COMPLETED" %}
+      <form method="POST" action="/task/{{item.id}}/complete">
+        <input type="hidden" name="redirect_to" value="/process-instance/{{process_instance.key}}">
+        <button class="btn btn-success">Complete</button>
+      </form>
+      {% endif %}
+    </td>
+
+</tr>
+{% endfor %}
+</table>
+
+<h3 class="box-title mt-5">Variables</h3>
+
+<table class="table">
+
+  <tr>
+    <th>Key</th>
+    <th>Process instance key</th>
+    <th>Scope key</th>
+    <th>Name</th>
+    <th>Value</th>
+    <th>Truncated</th>
+    <th>Tenant id</th>
+  </tr>
+
+  {% for item in variables %}
+  <tr>
+    <td>{{item.key|e}}</td>
+    <td>{{item.processInstanceKey|e}}</td>
+    <td>{{item.scopeKey|e}}</td>
+    <td>{{item.name|e}}</td>
+    <td>{{item.value|e}}</td>
+    <td>{{item.truncated|e}}</td>
+    <td>{{item.tenantId|e}}</td>
+  </tr>
+  {% endfor %}
+
+</table>
+
+{% endblock %}

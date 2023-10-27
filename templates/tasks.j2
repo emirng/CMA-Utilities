@@ -15,7 +15,7 @@
 <th>Task state</th>
 <th>Process definition key</th>
 <th>Process instance key</th>
-<!-- <th>Form</th> TODO: implement link to form -->
+<th>Form</th>
 <th></th>
 </tr>
 
@@ -36,10 +36,14 @@
 
 <td>{{item.taskState}}</td>
 <td>{{item.processDefinitionKey}}</td>
-<td>{{item.processInstanceKey}}</td>
-<!-- <td><a href="/form/{{item.formKey}}/{{item.processDefinitionKey}}">Goto form</a></td>
-TODO: implement link to form
--->
+<td><a href="/process-instance/{{item.processInstanceKey|e}}">{{item.processInstanceKey}}</a></td>
+<td>
+
+{% if item.formKey %}
+<a href="/form/{{item.formId}}/{{item.processDefinitionKey}}?process-instance={{item.processInstanceKey}}&task-id={{item.id}}">Goto form</a>
+{% endif %}
+
+</td>
 
 <td>
 
