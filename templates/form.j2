@@ -1,0 +1,40 @@
+{% extends "base.j2" %}
+
+{% block title %}Form{% endblock %}
+{% block _title %}Form{% endblock %}
+
+{% block content %}
+
+<form action="" method="POST">
+
+  {% if task %}
+  <h3>{{task}}</h3>
+  {% endif %}
+
+  {% for component in components %}
+  {% if component.type == "text"%}
+  <h3>{{component.text}}</h3>
+  {% elif component.type == "radio"%}
+
+  <div class="form-group">
+    <label for="{{component.id}}">{{component.label}}</label>
+    {% for value in component['values'] %}
+    <div class="form-check">
+      <input class="form-check-input" type="radio" name="{{component.key}}" id="{{component.id}}{{value.value}}" value="{{value.rvalue}}"{% if not task %} disabled{% endif%} {% if component.validate.required %} required{% endif %}>
+      <label class="form-check-label" for="{{component.id}}{{value.value}}">
+      {{value.label}}
+      </label>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  (unknown component)
+  {% endif %}
+
+  {% endfor %}
+  {% if task %}
+  <button type="submit" class="btn btn-primary">Submit and complete task</button>
+  {% endif %}
+</form>
+
+{% endblock %}

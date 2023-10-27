@@ -95,4 +95,41 @@ def variable():
     return render_template('variables.j2', items=items)
 
 
+@app.route('/form/<form_id>/<process_definition_key>', methods=['GET', 'POST'])
+def form(form_id, process_definition_key):
+    response = call(
+        'GET', '/v1/forms/{0}?processDefinitionKey={1}'.format(form_id, process_definition_key))
+    schema = json.loads(response.json()['schema'])
+
+    if request.method == 'POST':
+
+        data = {
+            'variables': []
+        }
+
+        for component in schema['components']:
+            if component['type'] == 'radio':
+                key = component['key']
+                data['variables'].append(
+                    {'name': key, 'value': request.form[key]})
+
+        call(
+            'PATCH', '/v1/tasks/{0}/complete'.format(request.args['task-id']), data=data)
+
+        return redirect('/task')
+
+    elif request.method == 'GET':
+
+        components = schema['components']
+
+        for component in components:
+            if component['type'] == 'radio':
+                for value in component['values']:
+                    # TODO: this solution makes our example process to work.
+                    #      look over so every value works
+                    value['rvalue'] = '&quot;{0}&quot;'.format(value['value'])
+
+        return render_template('form.j2', components=components, task=request.args.get('task-id'))
+
+
 app.run(debug=True)
