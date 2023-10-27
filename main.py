@@ -34,6 +34,9 @@ def process_instance(process_key):
     tasks = call('POST', '/v1/tasks/search',
                  data={'processInstanceKey': process_key})
     tasks = tasks.json()
+    for task in tasks:
+        if task['formKey'] is not None:
+            task['formId'] = task['formKey'].split(':')[2]
 
     variables = call('POST', '/v1/variables/search',
                      data={'processInstanceKey': process_key})
@@ -63,6 +66,8 @@ def task():
     for item in items:
         for key in ['creationDate', 'completionDate']:
             item[key] = date_output(item[key])
+        if item['formKey'] is not None:
+            item['formId'] = item['formKey'].split(':')[2]
 
     return render_template('tasks.j2', items=items)
 
