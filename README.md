@@ -5,11 +5,13 @@ CMA Utilities is a prototype web based application for presenting management and
 At the moment it can
 
 * List Process-instances
+* View single process-instance and its Tasks and Variables
 * List Tasks
-
+* Goto Task form and submit variables
 * Delete Process-instances
 * Set Tasks to complete
 * Assign user to unassigned tasks
+* List Variables
 
 ![image](https://github.com/emirng/CMA-Utilities/assets/135670768/1ce27b1d-7d59-4494-8d48-b843ab117123)
 
