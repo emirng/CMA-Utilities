@@ -3,6 +3,26 @@ import pytest
 # CMA webservice host and port for test
 cma_ws_host, cma_ws_port = 'localhost', 5000
 
+
+@pytest.fixture
+def setup(request, pytestconfig, httpserver):
+    from pytest_flask.fixtures import LiveServer
+    from main import app
+
+    httpserver.expect_request(
+        '/oauth/token').respond_with_json({'access_token': 'x'})
+
+    app.config['AUTH_SERVER'], app.config['REST_SERVER'] = [
+        'http://{0}:{1}'.format(httpserver.host, httpserver.port)] * 2
+    app.config['DEBUG'] = pytestconfig.getoption('--cma-ws-debug')
+
+    server = LiveServer(app, cma_ws_host, cma_ws_port, wait=5)
+    server.start()
+
+    request.addfinalizer(server.stop)
+    yield server, httpserver, app
+
+
 driver = None
 
 

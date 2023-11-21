@@ -2,7 +2,26 @@ import os
 import requests
 from cma_secrets import client_id, client_secret, region_id, cluster_id
 
-login_url = 'https://login.cloud.camunda.io/oauth/token'
+
+def get_auth_server():
+    from flask import current_app
+    app = current_app
+    return app.config["AUTH_SERVER"]
+
+
+def get_rest_server(region_id, audience, cluster_id):
+    from flask import current_app
+    app = current_app
+    return app.config["REST_SERVER"].format(
+        region_id=region_id,
+        audience=audience,
+        cluster_id=cluster_id,
+    )
+
+
+def get_login_url():
+    return get_auth_server()+'/oauth/token'
+
 
 main_dir = os.path.normpath(os.path.join(os.path.dirname(__file__)))
 
@@ -18,13 +37,13 @@ def get_token(audience, force_refresh=False):
             with open(token_file) as f:
                 return f.read()
 
+    login_url = get_login_url()
     response = requests.post(login_url, json={
         "client_id": client_id,
         "client_secret": client_secret,
         "audience": "{0}.camunda.io".format(audience),
         "grant_type": "client_credentials",
     })
-
     token = response.json()['access_token']
 
     with open(token_file, 'w') as f:
@@ -48,8 +67,8 @@ def call(method, endpoint, data=None):
     }["/".join(endpoint.split('/')[:3])]
 
     token = get_token(audience)
-    task_url = 'https://{0}.{1}.camunda.io/{2}{3}'.format(
-        region_id, audience, cluster_id, endpoint)
+    task_url = get_rest_server(region_id, audience, cluster_id) + endpoint
+
     response = requests.request(method, task_url, headers={
                                 'Authorization': 'Bearer {0}'.format(token)}, json=data)
 
