@@ -124,6 +124,65 @@ def test_task_complete_at_search_view(setup, webdriver):
     assert complete_request_handler not in httpserver.oneshot_handlers
 
 
+def test_assign_user_to_unassigned_task(setup, webdriver):
+
+    # task to assign and to what user
+    task_id = '6755399441084841'
+    username = 'Emil'
+
+    # --- mock camunda api tasks/search
+    httpserver = setup[1]
+
+    keys = ['id', 'name', 'creationDate', 'completionDate', 'assignee',
+            'taskState', 'processDefinitionKey', 'processInstanceKey', 'formKey']
+
+    items_values = [
+        [
+            '6755399441084844', "Decide what's for dinner", '2022-02-02T12:12:12.000+0000',
+            '2022-02-02T12:12:12.000+0000', 'Lisa', 'COMPLETED', '2251799813703085',
+            '6755399441084839', '1:1:1',
+        ],
+        [
+            task_id, "Decide what's for dinner", '2022-02-02T12:12:12.000+0000',
+            None, None, 'CREATED', '2251799813703011',
+            '6755399441084822', '1:1:1',
+        ],
+    ]
+    items = [{k: v for k, v in zip(keys, values)} for values in items_values]
+
+    httpserver.expect_request('/v1/tasks/search').respond_with_json(items)
+    # ---
+
+    # --- mock camunda api endpoint for assign (for the specific task)
+    data = {
+        'assignee': username,
+        'allowOverrideAssignment': True
+    }
+    assign_request_handler = httpserver.expect_oneshot_request(
+        f'/v1/tasks/{task_id}/assign', method='PATCH', json=data)
+    assign_request_handler.respond_with_json({})
+    # ---
+
+    # part 1: go to task page and click assign for that specific task to assign new user to
+    webdriver.path_get('/task')
+    tr = find_table_row(webdriver, 'Id', task_id)
+    for assign_anchor in tr.find_elements('xpath', "./td/a[text()='Assign']"):
+        assign_anchor.click()
+    assert webdriver.current_path == f'/task/{task_id}/assign'
+
+    # part 2:  enter username in form and press sumbit
+    _input = webdriver.find_elements(
+        'xpath', "//label[text()='Assignee']/parent::div/input")[0]
+    _input.send_keys(username)
+
+    submit_button = _input.find_elements(
+        'xpath', "./parent::div/parent::form/button[text()='Submit']")[0]
+    submit_button.click()
+
+    # assert that the call was made to camunda (if gone from oneshot handles that means it was handled)
+    assert assign_request_handler not in httpserver.oneshot_handlers
+
+
 def find_table_row(webdriver, column, value):
     for table in webdriver.find_elements('xpath', '//table'):
         for e, th in enumerate(table.find_elements('xpath', './tbody/tr[1]/th'), 1):
