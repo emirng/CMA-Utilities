@@ -85,7 +85,17 @@ def test_process_instance_delete_at_search_view(setup, webdriver):
     # ---
 
     # get process instances and delete second row button
-    webdriver.path_get('/process-instance')
-    webdriver.find_elements('css selector', 'button')[1].click()  # TODO: use a selector to find row with the correct process instance id and find its delete button by the actual label of the button.
+    tr = find_table_row(webdriver, 'Key', pi_id)
+    for delete_button in tr.find_elements('xpath', "./td/form/button[text()='Delete']"):
+        delete_button.click()
 
     assert delete_request_handler not in httpserver.oneshot_handlers
+
+
+def find_table_row(webdriver, column, value):
+    for table in webdriver.find_elements('xpath', '//table'):
+        for e, th in enumerate(table.find_elements('xpath', './tbody/tr[1]/th'), 1):
+            if th.text == column:
+                for tr in table.find_elements(
+                        'xpath', f"./tbody/tr/td[{e}]/a[text()='{value}']/parent::td/parent::tr"):
+                    return tr
