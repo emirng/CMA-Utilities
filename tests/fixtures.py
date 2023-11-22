@@ -35,7 +35,7 @@ def webdriver():
         options = Options()
         options.BinaryLocation = '/usr/bin/chromium-browser'
         options.add_argument('--headless')
-
+        options.add_argument("window-size=1800,900")
         class Webdriver(webdriver.Chrome):
 
             def path_get(self, path):
