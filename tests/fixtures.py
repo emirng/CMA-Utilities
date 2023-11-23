@@ -12,6 +12,27 @@ def setup(request, pytestconfig, httpserver):
     httpserver.expect_request(
         '/oauth/token').respond_with_json({'access_token': 'x'})
 
+    # --- mock camunda api tasks/search
+    keys = ['id', 'name', 'creationDate', 'completionDate', 'assignee',
+            'taskState', 'processDefinitionKey', 'processInstanceKey', 'formKey']
+
+    items_values = [
+        [
+            '6755399441084844', "Decide what's for dinner", '2022-02-02T12:12:12.000+0000',
+            '2022-02-02T12:12:12.000+0000', 'Lisa', 'COMPLETED', '2251799813703085',
+            '6755399441084839', '1:2:3',
+        ],
+        [
+            '6755399441084841', "Decide what's for dinner", '2022-02-02T12:12:12.000+0000',
+            None, None, 'CREATED', '2251799813703011',
+            '6755399441084822', '4:5:6',
+        ],
+    ]
+    items = [{k: v for k, v in zip(keys, values)} for values in items_values]
+
+    httpserver.expect_request('/v1/tasks/search').respond_with_json(items)
+    # ---
+
     app.config['AUTH_SERVER'], app.config['REST_SERVER'] = [
         'http://{0}:{1}'.format(httpserver.host, httpserver.port)] * 2
     app.config['DEBUG'] = pytestconfig.getoption('--cma-ws-debug')
@@ -36,6 +57,7 @@ def webdriver():
         options.BinaryLocation = '/usr/bin/chromium-browser'
         options.add_argument('--headless')
         options.add_argument("window-size=1800,900")
+
         class Webdriver(webdriver.Chrome):
 
             def path_get(self, path):

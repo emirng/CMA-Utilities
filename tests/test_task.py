@@ -6,6 +6,13 @@ def test_task_search_view(setup, webdriver):
 
     # --- mock camunda api tasks/search
     httpserver = setup[1]
+
+    # --- to make this test as it is not I have to clear the http-server
+    # from that already expected-request that goes in conflict with
+    # expected-request define in this test.
+    httpserver.clear()
+    # ---
+
     keys = ['id', 'name', 'creationDate', 'completionDate', 'assigne',
             'taskState', 'processDefinitionKey', 'processInstanceKey', 'formKey']
 
@@ -124,34 +131,25 @@ def test_task_complete_at_search_view(setup, webdriver):
     assert complete_request_handler not in httpserver.oneshot_handlers
 
 
+def test_goto_task_form_from_task_search_view(setup, webdriver):
+
+    task_id = '6755399441084844'
+    webdriver.path_get('/task')
+    tr = find_table_row(webdriver, 'Id', task_id)
+    anchor_goto_form = tr.find_elements(
+        'xpath', "./td/a[text()='Goto form']")[0]
+    anchor_goto_form.click()
+
+    assert webdriver.current_path == f'/form/3/2251799813703085?process-instance=6755399441084839&task-id={task_id}'
+
+
 def test_assign_user_to_unassigned_task(setup, webdriver):
+
+    httpserver = setup[1]
 
     # task to assign and to what user
     task_id = '6755399441084841'
     username = 'Emil'
-
-    # --- mock camunda api tasks/search
-    httpserver = setup[1]
-
-    keys = ['id', 'name', 'creationDate', 'completionDate', 'assignee',
-            'taskState', 'processDefinitionKey', 'processInstanceKey', 'formKey']
-
-    items_values = [
-        [
-            '6755399441084844', "Decide what's for dinner", '2022-02-02T12:12:12.000+0000',
-            '2022-02-02T12:12:12.000+0000', 'Lisa', 'COMPLETED', '2251799813703085',
-            '6755399441084839', '1:1:1',
-        ],
-        [
-            task_id, "Decide what's for dinner", '2022-02-02T12:12:12.000+0000',
-            None, None, 'CREATED', '2251799813703011',
-            '6755399441084822', '1:1:1',
-        ],
-    ]
-    items = [{k: v for k, v in zip(keys, values)} for values in items_values]
-
-    httpserver.expect_request('/v1/tasks/search').respond_with_json(items)
-    # ---
 
     # --- mock camunda api endpoint for assign (for the specific task)
     data = {
