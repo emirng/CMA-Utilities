@@ -21,9 +21,7 @@
     {% for value in component['values'] %}
     <div class="form-check">
       <input class="form-check-input" type="radio" name="{{component.key}}" id="{{component.id}}{{value.value}}" value="{{value.rvalue}}"{% if not task %} disabled{% endif%} {% if component.validate.required %} required{% endif %}>
-      <label class="form-check-label" for="{{component.id}}{{value.value}}">
-      {{value.label}}
-      </label>
+      <label class="form-check-label" for="{{component.id}}{{value.value}}">{{value.label}}</label>
     </div>
     {% endfor %}
   </div>

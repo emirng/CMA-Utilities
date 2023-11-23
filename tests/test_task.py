@@ -88,7 +88,6 @@ def test_task_complete_at_search_view(setup, webdriver):
 
 
 def test_goto_task_form_from_task_search_view(setup, webdriver):
-
     task_id = '6755399441084844'
     webdriver.path_get('/task')
     tr = find_table_row(webdriver, 'Id', task_id)
@@ -97,6 +96,47 @@ def test_goto_task_form_from_task_search_view(setup, webdriver):
     anchor_goto_form.click()
 
     assert webdriver.current_path == f'/form/3/2251799813703085?process-instance=6755399441084839&task-id={task_id}'
+
+
+def test_from_task_form_submit_variables(setup, webdriver):
+
+    task_id = '6755399441084844'
+    form_id = '3'
+    process_definition_key = '6755399441084839'
+    process_instance = '6755399441084839'
+
+    httpserver = setup[1]
+
+    # --- mock camunda api endpoint for getting form data
+    url = f'/v1/forms/{form_id}'
+    form_request_handler = httpserver.expect_request(
+        url, query_string=f'processDefinitionKey={process_definition_key}',  method='GET')
+    form_request_handler.respond_with_json(
+        {'schema': '{"components":[ {"key": "test-radio-key", "type":"radio", "values":[ {"value":"test-radio-value-1", "label":"test-radio-label-1"  }, {"value":"test-radio-value-2", "label":"test-radio-label-2"  }  ], "validate":{"required":true}  }  ]}'})
+    # ---
+
+    # --- mock camunda api endpoint for submit variables during complete task
+    data = {'variables': [
+        {'name': 'test-radio-key', 'value': '"test-radio-value-2"'}]}
+
+    submit_request_handler = httpserver.expect_oneshot_request(
+        f'/v1/tasks/{task_id}/complete', method='PATCH', json=data)
+    submit_request_handler.respond_with_json({})
+    # ---
+
+    webdriver.path_get(
+        f'/form/{form_id}/{process_definition_key}?process-instance={process_instance}&task-id={task_id}')
+
+    # click and select test-radio-label-2
+    webdriver.find_elements(
+        'xpath', "//*[text()='test-radio-label-2']")[0].click()
+
+    # submit form
+    webdriver.find_elements(
+        'xpath', "//button[text()='Submit and complete task']")[0].click()
+
+    # assert that the call was made to camunda (if gone from oneshot handles that means it was handled)
+    assert submit_request_handler not in httpserver.oneshot_handlers
 
 
 def test_assign_user_to_unassigned_task(setup, webdriver):

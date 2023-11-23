@@ -102,8 +102,9 @@ def variable():
 
 @app.route('/form/<form_id>/<process_definition_key>', methods=['GET', 'POST'])
 def form(form_id, process_definition_key):
-    response = call(
-        'GET', '/v1/forms/{0}?processDefinitionKey={1}'.format(form_id, process_definition_key))
+    form_scheme_url = '/v1/forms/{0}?processDefinitionKey={1}'.format(
+        form_id, process_definition_key)
+    response = call('GET', form_scheme_url)
     schema = json.loads(response.json()['schema'])
 
     if request.method == 'POST':
