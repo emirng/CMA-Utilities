@@ -4,50 +4,6 @@ from tests.fixtures import webdriver
 
 def test_task_search_view(setup, webdriver):
 
-    # --- mock camunda api tasks/search
-    httpserver = setup[1]
-
-    # --- to make this test as it is not I have to clear the http-server
-    # from that already expected-request that goes in conflict with
-    # expected-request define in this test.
-    httpserver.clear()
-    # ---
-
-    keys = ['id', 'name', 'creationDate', 'completionDate', 'assigne',
-            'taskState', 'processDefinitionKey', 'processInstanceKey', 'formKey']
-
-    items_values = [
-        [
-            '6755399441084844',
-            "Decide what's for dinner",
-            "2022-02-02T12:12:12.000+0000",
-            "2022-02-02T12:12:12.000+0000",
-            'Lisa',
-            'COMPLETED',
-            '2251799813703085',
-            '6755399441084839',
-            "1:1:1",
-        ],
-        [
-            '6755399441084841',
-            "Decide what's for dinner",
-            "2022-02-02T12:12:12.000+0000",
-            None,
-            'Lisa',
-            'CREATED',
-            '2251799813703011',
-            '6755399441084822',
-            "1:1:1",
-        ],
-
-
-    ]
-    items = [{k: v for k, v in zip(keys, values)} for values in items_values]
-
-    httpserver.expect_request(
-        '/v1/tasks/search').respond_with_json(items)
-    # ---
-
     # get process instances
     webdriver.path_get('/task')
 
@@ -62,7 +18,7 @@ def test_task_search_view(setup, webdriver):
         ['Id', 'Name', 'Creation data', 'Completion data', 'Assignee', 'Task state',
             'Process definition key', 'Process instance key', 'Form', ''],
         ['6755399441084844', "Decide what's for dinner", '2022-02-02\n12:12 +0000', '2022-02-02\n12:12 +0000',
-            'Unassigned\nAssign', 'COMPLETED', '2251799813703085', '6755399441084839', 'Goto form', ''],
+            'Lisa', 'COMPLETED', '2251799813703085', '6755399441084839', 'Goto form', ''],
         ['6755399441084841', "Decide what's for dinner", '2022-02-02\n12:12 +0000', '-',
             'Unassigned\nAssign', 'CREATED', '2251799813703011', '6755399441084822', 'Goto form', 'Complete']
     ]
