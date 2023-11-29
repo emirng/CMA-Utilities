@@ -1,3 +1,4 @@
+import pytest
 from tests.fixtures import setup
 from tests.fixtures import webdriver
 
@@ -87,6 +88,7 @@ def test_task_complete_at_search_view(setup, webdriver):
     assert complete_request_handler not in httpserver.oneshot_handlers
 
 
+@pytest.mark.dependency()
 def test_goto_task_form_from_task_search_view(setup, webdriver):
     task_id = '6755399441084844'
     webdriver.path_get('/task')
@@ -139,8 +141,24 @@ def test_from_task_form_submit_variables(setup, webdriver):
     assert submit_request_handler not in httpserver.oneshot_handlers
 
 
-def test_assign_user_to_unassigned_task(setup, webdriver):
+@pytest.mark.dependency()
+def test_reach_assing_form_from_task_view(setup, webdriver):
+    httpserver = setup[1]
 
+    # task to assign and to what user
+    task_id = '6755399441084841'
+    username = 'Emil'
+
+    # go to task page and click assign for that specific task to assign new user to
+    webdriver.path_get('/task')
+    tr = find_table_row(webdriver, 'Id', task_id)
+    for assign_anchor in tr.find_elements('xpath', "./td/a[text()='Assign']"):
+        assign_anchor.click()
+    assert webdriver.current_path == f'/task/{task_id}/assign'
+
+
+@pytest.mark.dependency()
+def test_assign_user_on_assign_view(setup, webdriver):
     httpserver = setup[1]
 
     # task to assign and to what user
@@ -157,14 +175,8 @@ def test_assign_user_to_unassigned_task(setup, webdriver):
     assign_request_handler.respond_with_json({})
     # ---
 
-    # part 1: go to task page and click assign for that specific task to assign new user to
-    webdriver.path_get('/task')
-    tr = find_table_row(webdriver, 'Id', task_id)
-    for assign_anchor in tr.find_elements('xpath', "./td/a[text()='Assign']"):
-        assign_anchor.click()
-    assert webdriver.current_path == f'/task/{task_id}/assign'
-
-    # part 2:  enter username in form and press sumbit
+    webdriver.path_get(f'/task/{task_id}/assign')
+    # enter username in form and press sumbit
     _input = webdriver.find_elements(
         'xpath', "//label[text()='Assignee']/parent::div/input")[0]
     _input.send_keys(username)
@@ -193,3 +205,24 @@ def find_table_row(webdriver, column, value):
                     return tr
 
     raise Exception()
+
+
+# --- dependency tests ---
+
+
+@pytest.mark.dependency(depends=["test_goto_task_form_from_task_search_view"])
+def test_have_at_least_one_way_to_reach_task_form():
+    pass
+
+
+@pytest.mark.dependency(depends=["test_reach_assing_form_from_task_view"])
+def test_have_at_least_one_way_to_reach_assign_form():
+    pass
+
+
+@pytest.mark.dependency(depends=[
+    "test_have_at_least_one_way_to_reach_assign_form",
+    "test_assign_user_on_assign_view",
+])
+def test_assign_user_to_unassigned_task(setup, webdriver):
+    pass
